@@ -1,0 +1,59 @@
+body {
+  font-family: sans-serif;
+}
+core-header-panel {
+  background: white;
+}
+/*
+#navheader {
+  background-color: #CC0000;
+}*/
+#mainheader span {
+  color:white;
+  text-shadow: 0px 2px 3px #666;
+}
+#navicon{
+    color:white;
+}
+core-toolbar {
+  background-color: #CC0000;
+}
+.content {
+  padding: 20px;
+}
+/* drawer is always visible on a wide screen
+   so menu button isn't required */
+core-drawer-panel:not([narrow]) #navicon {
+  display: none;
+}
+
+
+/**
+ * SERVICE
+ */
+
+#btn-demo{
+    position: absolute;
+    right: 15px;
+    bottom: 20px;
+
+
+}
+#btn-service{
+    position: absolute;
+    right: 85px;
+    bottom: 20px;
+}
+
+.service-on{
+    font-weight: bolder;
+    text-shadow: 0px 3px 4px #666;
+}
+
+.span-service-off{
+    font-weight: normal;
+}
+
+ paper-radio-button {
+      display: block;
+    }

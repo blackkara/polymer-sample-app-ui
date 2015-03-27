@@ -1,0 +1,210 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/core-icons/av-icons.html">
+<link rel="import" href="/bower_components/core-icons/communication-icons.html">
+<link rel="import" href="/bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="/bower_components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="/bower_components/core-menu/core-menu.html">
+<link rel="import" href="/bower_components/core-item/core-item.html">
+<link rel="import" href="/bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="/bower_components/core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="/bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="/bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="/bower_components/google-map/google-map.html">
+
+
+<polymer-element name="app-ui" constructor="AppUi"
+    attributes="service lastPosition speed">
+
+    <template>
+
+        <link rel="stylesheet" href="app-ui.css">
+
+        <core-drawer-panel id="drawerPanel" forceNarrow="true">
+
+            <core-header-panel drawer>
+
+                <core-toolbar id="navheader">
+
+                    <span id="brand">Kipyo</span>
+
+                </core-toolbar>
+
+                <core-menu id="main-menu">
+
+                    <core-item icon="room" label="Map"><a href="#map"></a></core-item>
+
+                    <core-item icon="room" label="Demo Settings"><a href="#demo-settings"></a></core-item>
+
+                </core-menu>
+
+            </core-header-panel>
+
+            <core-header-panel main>
+
+                <core-toolbar id="mainheader">
+
+                    <paper-icon-button id="navicon" icon="menu"></paper-icon-button>
+
+                    <span flex>Kipyo</span>
+
+                </core-toolbar>
+
+            <div class="content" fit vertical layout>
+                    <core-animated-pages id="content-pages" selected="0" fit>
+
+                        <section>
+                          <google-map fit zoom="16">
+                               <google-map-marker></google-map-marker>
+                          </google-map>
+
+                           <paper-fab mini="true" icon="communication:location-on" id="btn-service" on-click="{{btnServiceClick}}"></paper-fab>
+                           <paper-fab icon="av:play-arrow" id="btn-demo" on-click="{{btnDemoClick}}"></paper-fab>
+                       </section>
+
+                       <section fit>
+                         <paper-radio-group selected="{{selection}}">
+                          <paper-radio-button name="fast" label="Fast"></paper-radio-button>
+                          <paper-radio-button name="fastest" label="Fastest"></paper-radio-button>
+                          <paper-radio-button name="normal" label="Normal"></paper-radio-button>
+                          <paper-radio-button name="slow" label="Slow"></paper-radio-button>
+                        </paper-radio-group>
+                       </section>
+
+                    </core-animated-pages>
+
+          </div>
+
+            </core-header-panel>
+
+        </core-drawer-panel>
+
+    </template>
+
+
+    <script>
+        /*
+        business.addEventListener('on-demo-finished', function(e){
+            var btnDemo = ui.shadowRoot.querySelector('#btn-demo');
+            btnDemo.icon = 'av:play-arrow';
+            business.demo = false;
+        });
+        */
+        Polymer({
+
+            log: true,
+
+            tag: 'app-ui',
+
+            map: null,
+
+            marker: null,
+
+            setPosition: function(position){
+                this.map.latitude = Number(position.lat);
+                this.map.longitude = Number(position.lng);
+                this.marker.latitude = Number(position.lat);
+                this.marker.longitude = Number(position.lng);
+            },
+
+
+            selectionChanged: function () {
+              this.fire('on-demo-speed-changed', this.selection);
+              window.location.hash = 'map';
+            },
+
+
+            demo: false,
+            setDemoUi: function(status){
+                var self = this;
+                var btnDemo = self.shadowRoot.querySelector('#btn-demo');
+                if(status){
+                    self.demo = true;
+                    btnDemo.icon = 'av:pause';
+                } else {
+                    self.demo = false;
+                    btnDemo.icon = 'av:play-arrow';
+                }
+            },
+            btnDemoClick: function(event, detail, sender){
+
+                var self = this;
+
+                if(!self.demo){
+                    self.demo = true;
+                    sender.icon = 'av:pause';
+                } else {
+                    self.demo = false;
+                    sender.icon = 'av:play-arrow';
+                }
+                self.fire('on-demo-changed', self.demo);
+            },
+
+            btnServiceClick: function(event, detail, sender){
+
+                var self = this;
+
+                if(!self.service){
+
+                    self.service = true;
+
+                    sender.icon = 'communication:location-off';
+
+                    if(self.log) console.log(self.tag + ': Service has started');
+
+                } else {
+
+                    this.service = false;
+
+                    sender.icon = 'communication:location-on';
+
+                    if(self.log) console.log(self.tag + ': Service has stopped');
+                }
+
+            },
+
+            ready: function(){
+                var self = this;
+
+                var btnDemo = self.shadowRoot.querySelector('#btn-demo');
+                var navicon = self.shadowRoot.querySelector('#navicon');
+                var drawerPanel = self.shadowRoot.querySelector('#drawerPanel');
+
+                if(!self.demo){
+                    btnDemo.icon = 'av:play-arrow';
+                } else {
+                    btnDemo.icon = 'av:pause';
+                }
+
+                navicon.addEventListener('click', function() {
+                    drawerPanel.togglePanel();
+                });
+
+                self.map = self.shadowRoot.querySelector('google-map');
+                self.marker = self.shadowRoot.querySelector('google-map-marker');
+
+                function nav(){
+                    var currentHash = window.location.hash == "" ? "#" : window.location.hash;
+                    var menuItems = self.shadowRoot.querySelectorAll('core-menu core-item a');
+                    for(var i=0; i < menuItems.length; i++){
+                        var hash = menuItems[i].hash == "" ? "#" : menuItems[i].hash;
+                        if(currentHash === hash){
+                            self.shadowRoot.querySelector('#main-menu').selected = i;
+                            self.shadowRoot.querySelector('#content-pages').selected = i;
+                            drawerPanel.closeDrawer();
+                        }
+                    }
+                }
+
+                window.onhashchange = nav;
+
+                this.selection = "normal";
+
+                nav();
+            }
+
+        });
+
+    </script>
+
+</polymer-element>
